@@ -6,7 +6,7 @@ library(splitstackshape)
 library(tidyr)
 library(writexl)
 library(dplyr)
-list_of_files <- list.files(path = "c:/Users/Alex/D/phd/R/test", 
+list_of_files <- list.files(path = "c:/Users/Alex/D/phd/R/script", 
                             recursive = TRUE,
                             pattern = "\\.txt$",
                             full.names = TRUE)
@@ -30,6 +30,8 @@ DT <- dateCleanFormat(DT)
 getBloodTestValues <- function(
   data
 ) {
+  data <- gsub("([.]\\d{2}[:]\\d{2};)", "", data)
+  
   file_ <- gsub('(\\d{2}-\\d{2}-\\d{4})(общийанализкрови)', 
                 '\\2\\1', data)
   
@@ -37,6 +39,10 @@ getBloodTestValues <- function(
   
   dates <- str_extract_all(file_, 
                            '(?<=общийанализкрови)(\\d{2}-\\d{2}-\\d{4}|)')
+  
+  dates <- unlist(dates)
+  
+  dates <- dates[which(dates != "")]
   
   id <- rep(str_extract(file_, "\\d+"), each = length(unlist(dates)))
   
@@ -46,7 +52,7 @@ getBloodTestValues <- function(
   file_1 = gsub('(общийанализкрови)(\\d{2}-\\d{2}-\\d{4})', '\\2\\1', file_)
   
   file_ <- stringr::str_extract_all(file_1, 
-                                    "(?<=общийанализкрови).*?(?=\\d{2}-\\d{2}-\\d{4})" )
+                                    "(?<=\\d{2}-\\d{2}-\\d{4}общийанализкрови).*?(?=\\d{2}-\\d{2}-\\d{4}|суммаклеток)" )
   
   values <- lapply(file_, function(
     bloodTest
@@ -105,5 +111,46 @@ getBloodTestValues <- function(
 
 
 out <- purrr::map_dfr(
+  DT[500:1000], getBloodTestValues
+)
+
+
+out <- sapply(
   DT, getBloodTestValues
 )
+
+out <- data.table::rbindlist(out, fill = T)
+
+data <- DT[38]
+data <- gsub(pattern = "([.]\\d{2}[:]\\d{2}[;])", "",data)
+file_ <- gsub('(\\d{2}-\\d{2}-\\d{4})(общийанализкрови)', 
+              '\\2\\1', data)
+
+
+
+dates <- str_extract_all(file_, 
+                         '(?<=общийанализкрови)(\\d{2}-\\d{2}-\\d{4}|)')
+dates <- str_extract_all(file_, 
+                         '(?<=общийанализкрови)(\\d{2}-\\d{2}-\\d{4}|)')
+
+dates <- unlist(dates)
+
+dates <- dates[which(dates != "")]
+id <- rep(str_extract(file_, "\\d+"), each = length(unlist(dates)))
+
+birthday <- rep(str_extract(file_, "\\d{2}-\\d{2}-\\d{4}"), 
+                each = length(unlist(dates)))
+
+file_1 = gsub('(общийанализкрови)(\\d{2}-\\d{2}-\\d{4})', '\\2\\1', file_)
+
+file_ <- stringr::str_extract_all(file_1, 
+                                  "(?<=\\d{2}-\\d{2}-\\d{4}общийанализкрови).*?(?=\\d{2}-\\d{2}-\\d{4})" )
+file_ <- stringr::str_extract_all(file_1, 
+                                  "(?<=\\d{2}-\\d{2}-\\d{4}общийанализкрови).*?(?=\\d{2}-\\d{2}-\\d{4}|суммаклеток)" )
+# (?<=\\d{2}-\\d{2}-\\d{4}общийанализкрови).*?(?=\\d{2}-\\d{2}-\\d{4}|суммаклеток)
+ddd <- unlist(dates)
+ddd[which(ddd == "")] <- "00-00-0000"
+
+dates <- ddd[which(ddd == "")] <- "00-00-0000"
+t <- "11-01-2021.12:28;"
+gsub("([.]\\d{2}[:]\\d{2}[;])", "", t)
