@@ -7,7 +7,7 @@ library(tidyr)
 library(writexl)
 library(dplyr)
 list_of_files <- list.files(path = "c:/Users/Alex/D/phd/R/script", 
-                            recursive = TRUE,
+                            recursive = F,
                             pattern = "\\.txt$",
                             full.names = TRUE)
 DT <- sapply(list_of_files, read_file)
